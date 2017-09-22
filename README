@@ -1,0 +1,7 @@
+$ mkdir bzr; cd bzr
+bzr$ bzr branch lp:dbus-cpp; cd dbus-cpp
+bzr/dbus-cpp$ git init
+bzr/dbus-cpp$ bzr fast-export --plain . | git fast-import
+bzr/dbus-cpp$ git remote add vicamo git@github.com:vicamo/ppa_dbus-cpp.git
+bzr/dbus-cpp$ git fetch vicamo
+bzr/dbus-cpp$ git rebase -i vicamo/master
