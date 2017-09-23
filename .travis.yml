@@ -65,10 +65,32 @@ before_deploy:
         -e "s#@BINTRAY_COMPONENT@#${BINTRAY_COMPONENT}#g" \
         -e "s#@BINTRAY_ARCH@#$(${DOCKER_EXEC} dpkg-architecture -qDEB_BUILD_ARCH)#g" | \
     tee .bintray.json
+- |
+  cat .bintray.json.in | \
+    sed -e "s#@BINTRAY_PACKAGE@#$(cat debian/control | grep ^Source: | awk '{print $2}')#g" \
+        -e "s#@BINTRAY_USER@#${BINTRAY_USER}#g" \
+        -e "s#@BINTRAY_REPO@#${BINTRAY_REPO}#g" \
+        -e "s#@BINTRAY_DESC@#${BINTRAY_DESC}#g" \
+        -e "s#@GITHUB_REPO@#${TRAVIS_REPO_SLUG}#g" \
+        -e "s#@BINTRAY_VERSION@#$(cat debian/changelog | head -n 1 | sed 's,.*(\(.*\)).*,\1,')#g" \
+        -e "s#@BINTRAY_RELEASE_DATE@#$(date -Iseconds --date="$(cat debian/changelog | grep -m 1 '^ -- ' | sed 's,^.*  ,,')")#g" \
+        -e "s#@BINTRAY_OUTDIR@#$(dirname ${TRAVIS_BUILD_DIR})#g" \
+        -e "s#@BINTRAY_POOLABBR@#$(cat debian/control | grep ^Source: | awk '{print $2}' | cut -c1)#g" \
+        -e "s#@BINTRAY_SUITE@#${SUITE}#g" \
+        -e "s#@BINTRAY_COMPONENT@#${BINTRAY_COMPONENT}#g" \
+        -e "s#@BINTRAY_ARCH@#all#g" | \
+    tee .bintray.all.json
 
 deploy:
 - provider: bintray
   file: .bintray.json
+  user: vicamo
+  key:
+    secure: "nCHfjRBPNpDrYCWKSQHxYQhC0+DHBAcYMwn8KLlJGXTqd0D2w3ZM4rVbXFe3tWKjkMEsXRBWrKrjU86nbWp5CMoVkiu7A5tfe8AC4bGghk0iRbMO2yeS3HmsIlW3YOpbck4zUjIlPwbgIg3uO8DuTEFGfyLfNao+WUnbUox3/5wtCMV6Ix6PW7nF++hk7kwJ34RJo9ue+GaFMt3SO/A7oIaV8Iq4xmaR5EI3h7l6r1dCiz20hdTrVrUWNcx3vyblzYmJh3mjc9tWJaj0vRJzxkDAnr3XcYPdNb6HRGpFHnfCLQgkJaElMtORUow4wJpfGb209dBhocqOpFq8xGbOHncaUqEF2H0jWWwvuIauIL58yfit5/QFkAPxGVv0QZ/66XhUR+seYNh8YGMqRTurxYFG0N06b/U2c+SJcs4KpEIfWVugP2CkV9GSDTq94W4/gYuPF2uLkwqFG0eipUam2TO8ljGaK+SpumVq0Pv8MwuS0lBjfiIzk2iSq1aq1lQUmZYNuLRRNsXLffgQwH3XzF7j13clCZwcUsYT1I/VkKkhz6P/pk3oBwF7qyFRwKuQ8KV0QFNtRMJLPJN/kFAhuEOeHDIySvv7N9NqOcLqzXWqKUNOQ0Dhok1l7ou+b0oj6cP5jsmV6qZvG/iNNrpKlhxMT+tm5+H7FBvUw/D7YzI="
+  on:
+    branch: release
+- provider: bintray
+  file: .bintray.all.json
   user: vicamo
   key:
     secure: "nCHfjRBPNpDrYCWKSQHxYQhC0+DHBAcYMwn8KLlJGXTqd0D2w3ZM4rVbXFe3tWKjkMEsXRBWrKrjU86nbWp5CMoVkiu7A5tfe8AC4bGghk0iRbMO2yeS3HmsIlW3YOpbck4zUjIlPwbgIg3uO8DuTEFGfyLfNao+WUnbUox3/5wtCMV6Ix6PW7nF++hk7kwJ34RJo9ue+GaFMt3SO/A7oIaV8Iq4xmaR5EI3h7l6r1dCiz20hdTrVrUWNcx3vyblzYmJh3mjc9tWJaj0vRJzxkDAnr3XcYPdNb6HRGpFHnfCLQgkJaElMtORUow4wJpfGb209dBhocqOpFq8xGbOHncaUqEF2H0jWWwvuIauIL58yfit5/QFkAPxGVv0QZ/66XhUR+seYNh8YGMqRTurxYFG0N06b/U2c+SJcs4KpEIfWVugP2CkV9GSDTq94W4/gYuPF2uLkwqFG0eipUam2TO8ljGaK+SpumVq0Pv8MwuS0lBjfiIzk2iSq1aq1lQUmZYNuLRRNsXLffgQwH3XzF7j13clCZwcUsYT1I/VkKkhz6P/pk3oBwF7qyFRwKuQ8KV0QFNtRMJLPJN/kFAhuEOeHDIySvv7N9NqOcLqzXWqKUNOQ0Dhok1l7ou+b0oj6cP5jsmV6qZvG/iNNrpKlhxMT+tm5+H7FBvUw/D7YzI="

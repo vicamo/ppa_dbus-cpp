@@ -23,7 +23,7 @@
     },
 
     "files": [{
-        "includePattern": "@BINTRAY_OUTDIR@/([^/]+\\.deb)",
+        "includePattern": "@BINTRAY_OUTDIR@/([^/]+_@BINTRAY_ARCH@\\.deb)",
         "uploadPattern": "pool/@BINTRAY_COMPONENT@/@BINTRAY_POOLABBR@/@BINTRAY_PACKAGE@/$1",
         "matrixParams": {
             "deb_distribution": "@BINTRAY_SUITE@",
