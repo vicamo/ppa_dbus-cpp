@@ -29,6 +29,19 @@ set (GMOCK_INCLUDE_DIR "${gmock_srcdir}/include" CACHE PATH "gmock source includ
 set (GMOCK_SOURCE_DIR "${gmock_srcdir}" CACHE PATH "gmock source directory")
 set (GTEST_INCLUDE_DIR "${gtest_srcdir}/include" CACHE PATH "gtest source include directory")
 
+# Google Test 1.8.0 release includes commit 794ef03 that added an
+# extra variadic argument to macro INSTANTIATE_TEST_CASE_P.
+# See https://github.com/google/googletest/commit/794ef030ebad671b699abdfd8e0474f93045be91
+execute_process(
+  COMMAND sh -c "test -n \"\$(cat ${GTEST_INCLUDE_DIR}/gtest/gtest-param-test.h | grep '^# *define \\+INSTANTIATE_TEST_CASE_P(.*\\.\\.\\.)')\" && echo YES || true"
+  OUTPUT_VARIABLE gtest_HAVE_NAMED_VP_TESTS
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  ERROR_QUIET
+)
+if(gtest_HAVE_NAMED_VP_TESTS)
+  add_definitions(-DGTEST_HAVE_NAMED_VP_TESTS)
+endif()
+
 add_subdirectory(${GMOCK_SOURCE_DIR} "${CMAKE_CURRENT_BINARY_DIR}/gmock" EXCLUDE_FROM_ALL)
 
 set(GTEST_BOTH_LIBRARIES gmock gtest gtest_main)
