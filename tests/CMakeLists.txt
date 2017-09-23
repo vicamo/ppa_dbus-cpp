@@ -14,12 +14,22 @@
 #
 # Authored by: Thomas Voss <thomas.voss@canonical.com>
 
-# Build with system gmock and embedded gtest
-set (GMOCK_INCLUDE_DIR "/usr/include/gmock/include" CACHE PATH "gmock source include directory")
-set (GMOCK_SOURCE_DIR "/usr/src/gmock" CACHE PATH "gmock source directory")
-set (GTEST_INCLUDE_DIR "${GMOCK_SOURCE_DIR}/gtest/include" CACHE PATH "gtest source include directory")
+if(IS_DIRECTORY /usr/src/googletest/googlemock)
+  set(gmock_srcdir /usr/src/googletest/googlemock)
+  set(gtest_srcdir /usr/src/googletest/googletest)
+elseif(IS_DIRECTORY /usr/src/gmock)
+  set(gmock_srcdir /usr/src/gmock)
+  set(gtest_srcdir /usr/src/gmock/gtest)
+else()
+  message(FATAL_ERROR "Can't find gmock. Where is it?")
+endif()
 
-add_subdirectory(${GMOCK_SOURCE_DIR} "${CMAKE_CURRENT_BINARY_DIR}/gmock")
+# Build with system gmock and embedded gtest
+set (GMOCK_INCLUDE_DIR "${gmock_srcdir}/include" CACHE PATH "gmock source include directory")
+set (GMOCK_SOURCE_DIR "${gmock_srcdir}" CACHE PATH "gmock source directory")
+set (GTEST_INCLUDE_DIR "${gtest_srcdir}/include" CACHE PATH "gtest source include directory")
+
+add_subdirectory(${GMOCK_SOURCE_DIR} "${CMAKE_CURRENT_BINARY_DIR}/gmock" EXCLUDE_FROM_ALL)
 
 set(GTEST_BOTH_LIBRARIES gmock gtest gtest_main)
 find_package(Threads)
