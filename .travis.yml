@@ -1,0 +1,44 @@
+sudo: required
+services:
+- docker
+
+env:
+  global:
+  - BINTRAY_USER=vicamo
+  - BINTRAY_REPO=ppa
+  - BINTRAY_COMPONENT=contrib
+  - DOCKER_EXEC="sudo docker exec test_container"
+  matrix:
+  - SUITE=buster
+  - SUITE=sid
+  - SUITE=stretch
+  - SUITE=artful
+  - SUITE=xenial
+  - SUITE=zesty
+
+branches:
+  only:
+  - master
+
+before_install:
+- sudo docker pull buildpack-deps:${SUITE}
+- sudo docker images
+- |
+  sudo docker run --detach --tty \
+    --name test_container \
+    --volume ${TRAVIS_BUILD_DIR%${TRAVIS_REPO_SLUG}}:${TRAVIS_BUILD_DIR%${TRAVIS_REPO_SLUG}} \
+    --workdir ${TRAVIS_BUILD_DIR} \
+    buildpack-deps:${SUITE} \
+    /bin/bash
+
+install:
+- ${DOCKER_EXEC} /bin/sh -c "echo \"deb [allow-insecure=yes] http://dl.bintray.com/${BINTRAY_USER}/${BINTRAY_REPO} ${SUITE} ${BINTRAY_COMPONENT}\" | tee /etc/apt/sources.list.d/bintray.list"
+- ${DOCKER_EXEC} apt-get update --quiet --quiet
+- ${DOCKER_EXEC} apt-get install --no-install-recommends --yes
+    devscripts equivs
+- ${DOCKER_EXEC} mk-build-deps
+    --install --remove
+    --tool 'apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes --allow-unauthenticated'
+
+script:
+- ${DOCKER_EXEC} dpkg-buildpackage -i -us -uc -b -j$(nproc)
