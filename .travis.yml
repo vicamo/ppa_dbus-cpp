@@ -14,8 +14,14 @@ env:
   - SUITE=sid
   - SUITE=stretch
   - SUITE=artful
+  - SUITE=bionic
   - SUITE=xenial
   - SUITE=zesty
+
+matrix:
+  fast_finish: true
+  allow_failures:
+  - env: SUITE=bionic
 
 branches:
   only:
