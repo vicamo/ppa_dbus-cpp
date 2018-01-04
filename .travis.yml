@@ -53,7 +53,8 @@ script:
     cat debian/changelog | awk "NR == 1 {\$2 = substr(\$2, 1, length(\$2) - 1) \"+${SUITE})\"}{print}" > debian/changelog.new;
     mv debian/changelog.new debian/changelog;
   fi
-- ${DOCKER_EXEC} dpkg-buildpackage -i -us -uc -b -j$(nproc)
+- ${DOCKER_EXEC} env WORKAROUND_BINTRAY_DEB_SUPPORT=1
+    dpkg-buildpackage -i -us -uc -b -j$(nproc)
 
 before_deploy:
 - |
